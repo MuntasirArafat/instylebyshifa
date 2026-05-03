@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
+import * as fbq from "@/app/lib/fpixel";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -37,8 +38,16 @@ export default function CheckoutPage() {
       // Small delay to prevent flash during hydration
       const timer = setTimeout(() => router.push("/"), 2000);
       return () => clearTimeout(timer);
+    } else {
+      fbq.event("InitiateCheckout", {
+        content_ids: items.map(i => i.id),
+        content_type: "product",
+        value: subtotal,
+        num_items: totalQty,
+        currency: "BDT",
+      });
     }
-  }, [items, router]);
+  }, [items, router, subtotal, totalQty]);
 
   const handlePlaceOrder = async () => {
     if (placing) return;
@@ -94,6 +103,15 @@ export default function CheckoutPage() {
 
       // Wait for 3 seconds to show loader/feedback
       await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      fbq.event("Purchase", {
+        content_ids: items.map(i => i.id),
+        content_type: "product",
+        value: total,
+        currency: "BDT",
+        num_items: totalQty,
+        order_id: data.orderNumber,
+      });
 
       clearCart();
       router.push(`/order-success?orderNumber=${encodeURIComponent(data.orderNumber || "")}`);

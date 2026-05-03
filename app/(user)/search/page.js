@@ -5,6 +5,7 @@ import Link from "next/link";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useQuery } from "@tanstack/react-query";
+import * as fbq from "@/app/lib/fpixel";
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -28,6 +29,12 @@ function SearchContent() {
   React.useEffect(() => {
     setDraftQuery(initialQuery);
     setDraftCategory(initialCategory);
+
+    if (initialQuery) {
+      fbq.event("Search", {
+        search_string: initialQuery,
+      });
+    }
   }, [initialQuery, initialCategory]);
 
   // Categories query

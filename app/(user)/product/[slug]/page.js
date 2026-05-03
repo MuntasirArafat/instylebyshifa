@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/context/CartContext";
 import Featured from "@/app/component/Featured";
+import * as fbq from "@/app/lib/fpixel";
 
 export default function ProductPage({ params }) {
   const router = useRouter();
@@ -48,6 +49,19 @@ export default function ProductPage({ params }) {
     };
   }, [slug]);
 
+  React.useEffect(() => {
+    if (product) {
+      fbq.event("ViewContent", {
+        content_name: product.name,
+        content_category: product.category,
+        content_ids: [product._id || product.id],
+        content_type: "product",
+        value: currentPrice,
+        currency: "BDT",
+      });
+    }
+  }, [product, currentPrice]);
+
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -74,6 +88,16 @@ export default function ProductPage({ params }) {
     // Use the custom price if available for the cart
     const itemToAdd = { ...product, price: currentPrice };
     addItem(itemToAdd, selectedSize, quantity);
+    
+    fbq.event("AddToCart", {
+      content_name: product.name,
+      content_category: product.category,
+      content_ids: [product._id || product.id],
+      content_type: "product",
+      value: currentPrice * quantity,
+      currency: "BDT",
+    });
+
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
@@ -86,6 +110,16 @@ export default function ProductPage({ params }) {
     setSizeError(false);
     const itemToAdd = { ...product, price: currentPrice };
     addItem(itemToAdd, selectedSize, quantity);
+
+    fbq.event("AddToCart", {
+      content_name: product.name,
+      content_category: product.category,
+      content_ids: [product._id || product.id],
+      content_type: "product",
+      value: currentPrice * quantity,
+      currency: "BDT",
+    });
+
     router.push("/checkout");
   };
 

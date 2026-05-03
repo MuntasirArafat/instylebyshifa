@@ -1,6 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import * as fbq from "@/app/lib/fpixel";
 
 export default function VisitorTracker() {
   const pathname = usePathname();
@@ -16,6 +17,7 @@ export default function VisitorTracker() {
     };
     
     logVisit();
+    fbq.pageview();
   }, [pathname]);
 
   return null;
